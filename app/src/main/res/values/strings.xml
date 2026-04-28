@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mexicare</string>
+    
+    <!-- Títulos -->
+    <string name="main_title">MEXICARE</string>
+    <string name="main_subtitle">Donación de Medicinas</string>
+    
+    <!-- Botones principales -->
+    <string name="btn_donar">QUIERO DONAR</string>
+    <string name="btn_donar_desc">Dona tus medicinas</string>
+    <string name="btn_solicitar">REQUIERO MEDICINA</string>
+    <string name="btn_solicitar_desc">Busca medicinas disponibles</string>
+    <string name="btn_organizaciones">ORGANIZACIONES</string>
+    <string name="btn_organizaciones_desc">Panel de administración</string>
+    
+    <!-- Login -->
+    <string name="login_title">INICIAR SESIÓN</string>
+    <string name="login_subtitle">Acceso para Organizaciones</string>
+    <string name="hint_usuario">Ingresa tu usuario</string>
+    <string name="hint_password">Ingresa tu contraseña</string>
+    <string name="btn_ingresar">INGRESAR</string>
+    <string name="login_help">💡 Administradores: usuario \'admin\'</string>
+    
+    <!-- Formularios -->
+    <string name="donor_title">DONAR MEDICINA</string>
+    <string name="requester_title">SOLICITAR MEDICINA</string>
+    <string name="label_medicina">Medicina:</string>
+    <string name="label_cantidad">Cantidad:</string>
+    <string name="label_fecha_caducidad">Fecha de Caducidad:</string>
+    <string name="hint_medicina">Busca o selecciona la medicina</string>
+    <string name="hint_cantidad">Número de unidades</string>
+    <string name="hint_fecha">Selecciona la fecha</string>
+    
+    <!-- Mensajes -->
+    <string name="msg_conexion_exitosa">✅ Conexión a base de datos exitosa</string>
+    <string name="msg_error_conexion">❌ Error de conexión a base de datos</string>
+    <string name="msg_campos_vacios">Por favor completa todos los campos</string>
+    <string name="msg_login_incorrecto">Usuario o contraseña incorrectos</string>
+    <string name="msg_medicina_caducada">No se pueden donar medicinas caducadas</string>
+</resources>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mexicare - Admin</title>
+    <style>
+        body { font-family: Arial; background: #1a1a2e; color: white; padding: 20px; }
+        h1 { color: #10B981; }
+        .card { background: #16213e; padding: 20px; margin: 10px 0; border-radius: 10px; }
+        .org-name { font-size: 18px; font-weight: bold; color: #10B981; }
+        .med { padding: 5px 10px; margin: 5px 0; background: #0f3460; border-radius: 5px; }
+        button { background: #10B981; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .badge { background: #e94560; padding: 5px 10px; border-radius: 20px; font-size: 14px; }
+        input { padding: 10px; font-size: 16px; border-radius: 5px; border: none; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🏥 Mexicare - Admin</h1>
+    
+    <div id="login-box" style="display:none;">
+        <h2>🔐 Login</h2>
+        <input type="text" id="usuario" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="doLogin()">Ingresar</button>
+        <button onclick="mostrarAdmin()">Ver Inventario</button>
+    </div>
+    
+    <div id="admin-box">
+        <button onclick="mostrarLogin()">🔐 Login</button>
+        <button onclick="cargar()">📦 Cargar Inventario</button>
+        <button onclick="cargarOrg()">🏢 Cargar Organizaciones</button>
+        <button onclick="cargarCatalogo()">💊 Cargar Catálogo</button>
+        <button onclick="cargarDonaciones()">📥 Donaciones</button>
+        <button onclick="cargarEntregas()">📤 Entregas</button>
+    </div>
+    
+    <br><br>
+    <div id="result"></div>
+
+    <script>
+    const API = 'http://localhost:5000';
+    
+    async function doLogin() {
+        const u = document.getElementById('usuario').value;
+        const p = document.getElementById('password').value;
+        
+        try {
+            const res = await fetch(API + '/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({usuario: u, clave: p})
+            });
+            const r = await res.json();
+            
+            if (r.success) {
+                alert('Login exitoso: ' + r.tipo);
+            } else {
+                alert(r.message);
+            }
+        } catch(e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    function mostrarLogin() {
+        document.getElementById('login-box').style.display = 'block';
+    }
+    
+    function mostrarAdmin() {
+        document.getElementById('login-box').style.display = 'none';
+    }
+    
+    async function cargar() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/inventario');
+            const items = await res.json();
+            
+            const porOrg = {};
+            items.forEach(item => {
+                const org = item.organizacion || 'Otro';
+                if (!porOrg[org]) porOrg[org] = [];
+                porOrg[org].push(item);
+            });
+            
+            let html = '<span class="badge">' + Object.keys(porOrg).length + ' organizaciones</span><br><br>';
+            
+            Object.keys(porOrg).forEach(org => {
+                const meds = porOrg[org];
+                const total = meds.reduce((s, i) => s + i.cantidad, 0);
+                
+                html += '<div class="card">';
+                html += '<div class="org-name">🏥 ' + org + ' (' + total + ' unidades)</div>';
+                
+                meds.forEach(m => {
+                    html += '<div class="med">💊 ' + m.nombre_comercial + ' - ' + m.cantidad + ' unidades (caduca: ' + m.fecha_caducidad + ')</div>';
+                });
+                
+                html += '</div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    
+    async function cargarOrg() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/organizaciones');
+            const orgs = await res.json();
+            
+            let html = '<span class="badge">' + orgs.length + ' organizaciones</span><br><br>';
+            
+            orgs.forEach(o => {
+                html += '<div class="card">';
+                html += '<div class="org-name">🏥 ' + o.nombre + '</div>';
+                html += '<div>👤 ' + o.usuario + '</div>';
+                html += '<div>📍 ' + o.latitud + ', ' + o.longitud + '</div>';
+                html += '<div>✅ ' + (o.activo ? 'Activa' : 'Inactiva') + '</div>';
+                html += '</div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    
+    async function cargarCatalogo() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/catalogo');
+            const meds = await res.json();
+            
+            let html = '<span class="badge">' + meds.length + ' medicamentos</span><br><br>';
+            
+            meds.forEach(m => {
+                html += '<div class="med">💊 ' + m.nombre_comercial + ' (' + m.presentacion + ') - ' + m.sustancia_activa + '</div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    
+    async function cargarDonaciones() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/donaciones');
+            const dons = await res.json();
+            
+            let html = '<span class="badge">' + dons.length + ' donaciones</span><br><br>';
+            
+            dons.forEach(d => {
+                html += '<div class="card">📥 ' + d.medicamento + ' - ' + d.cantidad + ' unidades<br>';
+                html += '<small>' + d.organizacion + ' - ' + d.curp_donatario + '</small></div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    
+    async function cargarEntregas() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/entregas');
+            const ents = await res.json();
+            
+            let html = '<span class="badge">' + ents.length + ' entregas</span><br><br>';
+            
+            ents.forEach(e => {
+                html += '<div class="card">📤 ' + e.medicamento + ' - ' + e.cantidad + ' unidades<br>';
+                html += '<small>' + e.organizacion + ' - ' + e.curp_receptor + '</small></div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    </script>
+</body>
+</html>

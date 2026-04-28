@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_green">#2E7D32</color>
+    <color name="primary_green_dark">#1B5E20</color>
+    <color name="primary_green_light">#4CAF50</color>
+    
+    <color name="primary_blue">#1976D2</color>
+    <color name="primary_blue_dark">#1565C0</color>
+    <color name="primary_blue_light">#2196F3</color>
+    
+    <color name="accent_orange">#F57C00</color>
+    <color name="accent_orange_dark">#E65100</color>
+    <color name="accent_orange_light">#FF9800</color>
+    
+    <color name="success_green">#388E3C</color>
+    <color name="warning_orange">#F57C00</color>
+    <color name="error_red">#D32F2F</color>
+    <color name="info_blue">#1976D2</color>
+    
+    <color name="background_light">#F5F5F5</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_card">#FFFFFF</color>
+    
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_hint">#999999</color>
+    <color name="text_disabled">#BDBDBD</color>
+    
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    
+    <color name="bottom_nav_selected">#2E7D32</color>
+    <color name="bottom_nav_unselected">#666666</color>
+    
+    <color name="caducidad_critica">#D32F2F</color>
+    <color name="caducidad_alerta">#F57C00</color>
+    <color name="caducidad_normal">#388E3C</color>
+    
+    <color name="border_light">#E0E0E0</color>
+    <color name="border_medium">#BDBDBD</color>
+    <color name="divider">#E0E0E0</color>
+</resources>

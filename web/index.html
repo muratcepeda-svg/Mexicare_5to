@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mexicare - Donación de Medicinas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="bg-gradient"></div>
+
+    <!-- Página Principal -->
+    <div id="page-home" class="page-home">
+        <div class="container">
+            <header class="header">
+                <div class="logo-container">
+                    <div class="logo-icon">🏥</div>
+                    <div class="logo-text">
+                        <h1>MEXICARE</h1>
+                        <p>Donación de Medicinas</p>
+                    </div>
+                </div>
+                <div class="header-tagline">
+                    <span>💚</span> Juntos salvamos vidas
+                </div>
+            </header>
+
+            <div class="main-cards">
+                <div class="main-card donate" onclick="showPage('donar')">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">💊</div>
+                        <div class="card-text">
+                            <h2>Quiero Donar</h2>
+                            <p>Regala tus medicines que no uses</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="main-card request" onclick="showPage('solicitar')">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🔍</div>
+                        <div class="card-text">
+                            <h2>Requiero Medicina</h2>
+                            <p>Encuentra medicines disponibles</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="main-card org" onclick="showPage('mapa')">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🏢</div>
+                        <div class="card-text">
+                            <h2>Organizaciones</h2>
+                            <p>Panel de administración</p>
+                        </div>
+                        <div class="card-arrow">→</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-meds">0</span>
+                    <span class="stat-label">Medicinas</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-orgs">0</span>
+                    <span class="stat-label">Organizaciones</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-dons">0</span>
+                    <span class="stat-label">Donaciones</span>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>🇲🇽 Made with love in Mexico</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Página: Donar -->
+    <div id="page-donar" class="page-form">
+        <div class="page-header green">
+            <button class="btn-back" onclick="showPage('home')">←</button>
+            <div class="page-title">
+                <span class="page-icon">💊</span>
+                <h2>Donar Medicina</h2>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-section">
+                <div class="form-header">
+                    <h3>Información de la Medicina</h3>
+                    <p>Completa los datos de la medicine que deseas donate</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Medicina <span class="required">*</span></label>
+                    <select class="form-input" id="donar-medicina">
+                        <option value="">Selecciona una medicina...</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cantidad <span class="required">*</span></label>
+                        <input type="number" class="form-input" id="donar-cantidad" placeholder="10" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Caducidad <span class="required">*</span></label>
+                        <input type="date" class="form-input" id="donar-fecha">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary green" onclick="showPage('mapa')">
+                    🗺️ Ver Organizaciones Cercanas
+                </button>
+                <button class="btn btn-secondary" onclick="showPage('home')">
+                    ← Volver al Inicio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página: Solicitar -->
+    <div id="page-solicitar" class="page-form">
+        <div class="page-header blue">
+            <button class="btn-back" onclick="showPage('home')">←</button>
+            <div class="page-title">
+                <span class="page-icon">🔍</span>
+                <h2>Solicitar Medicina</h2>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-section">
+                <div class="form-header">
+                    <h3>¿Qué medicina necesitas?</h3>
+                    <p>Busca en todas las organizaciones disponibles</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Medicina <span class="required">*</span></label>
+                    <select class="form-input" id="solicitar-medicina">
+                        <option value="">Selecciona una medicina...</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary blue full-width" onclick="buscarDisponibilidad()">
+                    🔍 Buscar Disponibilidad
+                </button>
+            </div>
+
+            <div id="results-section" class="results-section">
+                <h3>📋 Organizaciones con stock disponible</h3>
+                <div id="resultados-buscar"></div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="showPage('home')">
+                    ← Volver al Inicio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página: Login -->
+    <div id="page-login" class="page-form">
+        <div class="page-header orange">
+            <button class="btn-back" onclick="showPage('home')">←</button>
+            <div class="page-title">
+                <span class="page-icon">🔐</span>
+                <h2>Iniciar Sesión</h2>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="login-box">
+                <div class="login-illustration">
+                    <div class="illustration-icon">🏢</div>
+                    <h3>Acceso para Organizaciones</h3>
+                    <p>Ingresa tus credenciales para acceder al panel de administración</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" class="form-input" id="login-usuario" placeholder="cruzroja_bj">
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-input" id="login-password" placeholder="••••••••">
+                </div>
+
+                <button class="btn btn-primary orange full-width" onclick="doLogin()">
+                    Ingresar
+                </button>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="showPage('home')">
+                    ← Volver al Inicio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página: Admin Dashboard -->
+    <div id="page-admin" class="page-form">
+        <div class="page-header orange">
+            <button class="btn-back" onclick="logout()">←</button>
+            <div class="page-title">
+                <span class="page-icon">👨‍💼</span>
+                <h2>Panel Administrador</h2>
+            </div>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(this, 'agregar')">
+                    <span class="tab-icon">🏢</span>
+                    <span class="tab-text">Agregar Org</span>
+                </div>
+                <div class="tab" onclick="switchTab(this, 'inventario')">
+                    <span class="tab-icon">📦</span>
+                    <span class="tab-text">Inventario</span>
+                </div>
+                <div class="tab" onclick="switchTab(this, 'historico')">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-text">Histórico</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <!-- Tab: Agregar Organización -->
+            <div id="tab-agregar" class="tab-content">
+                <div class="form-section">
+                    <div class="form-header">
+                        <h3>Registrar Nueva Organización</h3>
+                        <p>Agrega una nueva organización al sistema</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nombre de la Organización</label>
+                        <input type="text" class="form-input" id="org-nombre" placeholder="Cruz Roja Mexicana">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Usuario</label>
+                            <input type="text" class="form-input" id="org-usuario" placeholder="cruzroja_bj">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" class="form-input" id="org-clave" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Latitud</label>
+                            <input type="text" class="form-input" id="org-latitud" placeholder="19.432608">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitud</label>
+                            <input type="text" class="form-input" id="org-longitud" placeholder="-99.133209">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary orange full-width" onclick="registrarOrganizacion()">
+                        ✓ Registrar Organización
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Inventario -->
+            <div id="tab-inventario" class="tab-content" style="display: none;">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="🔍 Buscar medicina...">
+                </div>
+
+                <div class="section-header">
+                    <h3>📦 Inventario Global</h3>
+                    <span class="badge" id="badge-inv">0 organizaciones</span>
+                </div>
+
+                <div class="inventory-cards" id="admin-inventario">
+                    <!-- Se carga desde la base de datos -->
+                </div>
+            </div>
+
+            <!-- Tab: Histórico -->
+            <div id="tab-historico" class="tab-content" style="display: none;">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="📅 Filtrar por fecha...">
+                </div>
+
+                <div class="section-header">
+                    <h3>📊 Histórico de Transacciones</h3>
+                </div>
+
+                <div class="transaction-section">
+                    <h4 class="tx-title donation">📥 Donaciones Recientes</h4>
+                    <div class="transaction-list" id="admin-donaciones">
+                        <!-- Se carga desde la base de datos -->
+                    </div>
+                </div>
+
+                <div class="transaction-section">
+                    <h4 class="tx-title delivery">📤 Entregas Realizadas</h4>
+                    <div class="transaction-list" id="admin-entregas">
+                        <!-- Se carga desde la base de datos -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="logout()">
+                    ← Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página: Organization Dashboard -->
+    <div id="page-org-dashboard" class="page-form">
+        <div class="page-header green">
+            <button class="btn-back" onclick="logout()">←</button>
+            <div class="page-title">
+                <span class="page-icon">🏢</span>
+                <h2 id="org-nombre-display">Organización</h2>
+            </div>
+        </div>
+        
+        <div class="org-stats">
+            <div class="org-stat">
+                <span class="org-stat-icon">📦</span>
+                <div class="org-stat-info">
+                    <span class="org-stat-number" id="org-stock">0</span>
+                    <span class="org-stat-label">En Stock</span>
+                </div>
+            </div>
+            <div class="org-stat">
+                <span class="org-stat-icon">📥</span>
+                <div class="org-stat-info">
+                    <span class="org-stat-number" id="org-dons">0</span>
+                    <span class="org-stat-label">Donaciones</span>
+                </div>
+            </div>
+            <div class="org-stat">
+                <span class="org-stat-icon">📤</span>
+                <div class="org-stat-info">
+                    <span class="org-stat-number" id="org-ents">0</span>
+                    <span class="org-stat-label">Entregas</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs green-tabs">
+                <div class="tab active" onclick="switchTab(this, 'org-inventario')">
+                    <span class="tab-icon">📦</span>
+                    <span class="tab-text">Mi Inventario</span>
+                </div>
+                <div class="tab" onclick="switchTab(this, 'org-donacion')">
+                    <span class="tab-icon">📥</span>
+                    <span class="tab-text">Registrar Donación</span>
+                </div>
+                <div class="tab" onclick="switchTab(this, 'org-entrega')">
+                    <span class="tab-icon">📤</span>
+                    <span class="tab-text">Registrar Entrega</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <!-- Tab: Mi Inventario -->
+            <div id="tab-org-inventario" class="tab-content">
+                <div class="my-inventory" id="org-inventario-list">
+                    <!-- Se carga desde la base de datos -->
+                </div>
+            </div>
+
+            <!-- Tab: Registrar Donación -->
+            <div id="tab-org-donacion" class="tab-content" style="display: none;">
+                <div class="form-section">
+                    <div class="form-header">
+                        <h3>📥 Registrar Donación Recibida</h3>
+                        <p>Registra una donación de medicine</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medicina <span class="required">*</span></label>
+                        <select class="form-input" id="org-don-medicina">
+                            <option value="">Selecciona una medicina...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cantidad <span class="required">*</span></label>
+                            <input type="number" class="form-input" id="org-don-cantidad" placeholder="20">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Caducidad</label>
+                            <input type="date" class="form-input" id="org-don-fecha">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CURP del Donante <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="org-don-curp" placeholder="ABCD123456HDFGHI01" maxlength="18">
+                    </div>
+
+                    <button class="btn btn-primary green full-width" onclick="registrarDonacionOrg()">
+                        ✓ Registrar Donación
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Registrar Entrega -->
+            <div id="tab-org-entrega" class="tab-content" style="display: none;">
+                <div class="form-section">
+                    <div class="form-header">
+                        <h3>📤 Registrar Entrega Realizada</h3>
+                        <p>Registra cuando entregas una medicina</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medicina <span class="required">*</span></label>
+                        <select class="form-input" id="org-ent-medicina">
+                            <option value="">Selecciona una medicina...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cantidad a Entregar <span class="required">*</span></label>
+                        <input type="number" class="form-input" id="org-ent-cantidad" placeholder="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label>CURP del Receptor <span class="required">*</span></label>
+                        <input type="text" class="form-input" id="org-ent-curp" placeholder="EFGH789012JKLMNO02" maxlength="18">
+                    </div>
+
+                    <button class="btn btn-primary green full-width" onclick="registrarEntregaOrg()">
+                        ✓ Registrar Entrega
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="logout()">
+                    ← Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página: Mapa -->
+    <div id="page-mapa" class="page-form" style="display:none;">
+        <div class="map-page">
+            <div class="map-header">
+                <button class="map-back" onclick="showPage('home')">←</button>
+                <div class="map-title">
+                    <span>🗺️</span>
+                    <h2>Organizaciones Cercanas</h2>
+                </div>
+                <button class="map-filter" onclick="alert('Filtros')">⚙️</button>
+            </div>
+
+            <!-- Mapa Leaflet -->
+            <div class="map-container">
+                <div id="leaflet-map" style="width:100%;height:100%;"></div>
+            </div>
+
+            <!-- Lista de Organizaciones -->
+            <div class="org-list-section">
+                <h3>📋 Todas las Organizaciones</h3>
+                <button class="btn btn-primary orange" onclick="showPage('login')" style="margin-bottom:15px;">🔐 Login Organizaciones</button>
+                <div class="org-list" id="mapa-organizaciones">
+                    <!-- Se carga desde la base de datos -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    // ===== API =====
+    const API = 'http://localhost:5000';
+    let currentUser = null;
+    let currentOrgId = null;
+
+    // ===== NAVEGACIÓN =====
+    function showPage(page) {
+        document.getElementById('page-home').style.display = 'none';
+        document.getElementById('page-donar').style.display = 'none';
+        document.getElementById('page-solicitar').style.display = 'none';
+        document.getElementById('page-login').style.display = 'none';
+        document.getElementById('page-admin').style.display = 'none';
+        document.getElementById('page-org-dashboard').style.display = 'none';
+        document.getElementById('page-mapa').style.display = 'none';
+        
+        const target = document.getElementById('page-' + page);
+        if (target) target.style.display = 'block';
+        
+        if (page === 'mapa') {
+            loadOrganizaciones();
+        }
+        
+        window.scrollTo(0, 0);
+    }
+
+    function switchTab(element, tabName) {
+        const tabsContainer = element.closest('.tabs-container');
+        if (tabsContainer) {
+            tabsContainer.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        }
+        element.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        document.getElementById('tab-' + tabName).style.display = 'block';
+    }
+
+    // ===== API HELPERS =====
+    async function fetchAPI(url) {
+        const res = await fetch(API + url);
+        return await res.json();
+    }
+
+    async function postAPI(url, data) {
+        const res = await fetch(API + url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        return await res.json();
+    }
+
+    // ===== HOME =====
+    async function loadHomeStats() {
+        const [cats, orgs, dons] = await Promise.all([
+            fetchAPI('/api/catalogo'),
+            fetchAPI('/api/organizaciones'),
+            fetchAPI('/api/donaciones')
+        ]);
+        
+        document.getElementById('stat-meds').textContent = cats.length;
+        document.getElementById('stat-orgs').textContent = orgs.length;
+        document.getElementById('stat-dons').textContent = dons.length;
+        
+        // Llenar selects
+        const selects = ['donar-medicina', 'solicitar-medicina', 'org-don-medicina', 'org-ent-medicina'];
+        selects.forEach(id => {
+            const sel = document.getElementById(id);
+            if (sel) {
+                cats.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombre_comercial + ' - ' + c.presentacion;
+                    sel.appendChild(opt);
+                });
+            }
+        });
+    }
+
+    // ===== LOGIN =====
+    async function doLogin() {
+        const u = document.getElementById('login-usuario').value;
+        const p = document.getElementById('login-password').value;
+        
+        if (!u || !p) {
+            alert('Ingresa usuario y contraseña');
+            return;
+        }
+        
+        try {
+            const r = await postAPI('/api/login', {usuario: u, clave: p});
+            
+            if (r.success) {
+                currentUser = u;
+                currentOrgId = r.id;
+                
+                if (r.tipo === 'admin') {
+                    loadAdminDashboard();
+                    showPage('admin');
+                } else {
+                    document.getElementById('org-nombre-display').textContent = '🏢 ' + u;
+                    loadOrgDashboard();
+                    showPage('org-dashboard');
+                }
+            } else {
+                alert(r.message || 'Credenciales incorrectas');
+            }
+        } catch (e) {
+            alert('Error de conexión: ' + e.message);
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        showPage('home');
+    }
+
+    // ===== ADMIN DASHBOARD =====
+    async function loadAdminDashboard() {
+        // Inventario
+        const inv = await fetchAPI('/api/inventario');
+        const porOrg = {};
+        inv.forEach(i => {
+            const org = i.organizacion || 'Otro';
+            if (!porOrg[org]) porOrg[org] = [];
+            porOrg[org].push(i);
+        });
+        
+        let html = '';
+        Object.keys(porOrg).forEach(org => {
+            const meds = porOrg[org];
+            const total = meds.reduce((s, i) => s + i.cantidad, 0);
+            html += '<div class="inventory-card">';
+            html += '<div class="inv-header"><span class="inv-org">🏥 ' + org + '</span><span class="inv-total">' + total + ' unidades</span></div>';
+            html += '<div class="inv-items">';
+            meds.forEach(m => {
+                html += '<div class="inv-item"><span class="inv-name">' + m.nombre_comercial + '</span><span class="inv-qty">' + m.cantidad + ' unidades</span></div>';
+            });
+            html += '</div></div>';
+        });
+        document.getElementById('admin-inventario').innerHTML = html;
+        document.getElementById('badge-inv').textContent = Object.keys(porOrg).length + ' organizaciones';
+        
+        // Donaciones
+        const dons = await fetchAPI('/api/donaciones');
+        html = '';
+        dons.forEach(d => {
+            html += '<div class="transaction-item donation"><span class="tx-icon donation">📥</span><div class="tx-details"><strong>' + d.medicamento + ' - ' + d.cantidad + ' unidades</strong><small>' + d.organizacion + '</small></div></div>';
+        });
+        document.getElementById('admin-donaciones').innerHTML = html;
+        
+        // Entregas
+        const ents = await fetchAPI('/api/entregas');
+        html = '';
+        ents.forEach(e => {
+            html += '<div class="transaction-item delivery"><span class="tx-icon delivery">📤</span><div class="tx-details"><strong>' + e.medicamento + ' - ' + e.cantidad + ' unidades</strong><small>' + e.organizacion + '</small></div></div>';
+        });
+        document.getElementById('admin-entregas').innerHTML = html;
+    }
+
+    // ===== ORGANIZATION DASHBOARD =====
+    async function loadOrgDashboard() {
+        const inv = await fetchAPI('/api/inventario?organizacion_id=' + currentOrgId);
+        
+        let html = '';
+        let total = 0;
+        inv.forEach(i => {
+            total += i.cantidad;
+            html += '<div class="my-inv-item">';
+            html += '<div class="my-inv-info"><span class="my-inv-name">💊 ' + i.nombre_comercial + '</span><span class="my-inv-detail">Caduca: ' + i.fecha_caducidad + '</span></div>';
+            html += '<div class="my-inv-qty"><span class="qty-number">' + i.cantidad + '</span><span class="qty-label">unidades</span></div>';
+            html += '</div>';
+        });
+        document.getElementById('org-inventario-list').innerHTML = html || '<p style="color:#888;text-align:center;padding:20px;">No hay medicamentos</p>';
+        document.getElementById('org-stock').textContent = total;
+    }
+
+    // ===== DONAR =====
+    async function registrarDonacion() {
+        const med = document.getElementById('donar-medicina').value;
+        const cant = document.getElementById('donar-cantidad').value;
+        const fecha = document.getElementById('donar-fecha').value;
+        
+        if (!med || !cant) {
+            alert('Completa todos los campos');
+            return;
+        }
+        
+        const r = await postAPI('/api/donaciones', {
+            idOrganizacion: 1,
+            idMedicina: parseInt(med),
+            cantidad: parseInt(cant),
+            curpDonatario: 'XXXX010101HNEXXX01',
+            fechaCaducidad: fecha
+        });
+        
+        alert(r.message || 'Donación registrada');
+    }
+
+    // ===== SOLICITAR =====
+    async function buscarDisponibilidad() {
+        const med = document.getElementById('solicitar-medicina').value;
+        
+        if (!med) {
+            alert('Selecciona una medicina');
+            return;
+        }
+        
+        const inv = await fetchAPI('/api/inventario');
+        
+        // Filtrar por el nombre de la medicina seleccionada
+        const cats = await fetchAPI('/api/catalogo');
+        const medicina = cats.find(c => c.id === parseInt(med));
+        
+        if (!medicina) {
+            alert('Medicina no encontrada');
+            return;
+        }
+        
+        // Buscar en inventario por nombre
+        const filtrado = inv.filter(i => i.nombre_comercial === medicina.nombre_comercial && i.cantidad > 0);
+        
+        let html = '';
+        if (filtrado.length === 0) {
+            html = '<p style="color:#888;text-align:center;padding:20px;">No hay disponibilidad de esta medicina</p>';
+        } else {
+            filtrado.forEach(i => {
+                html += '<div class="result-card"><div class="result-header"><span class="org-icon">🏥</span><div><h4>' + i.organizacion + '</h4><p>' + i.nombre_comercial + '</p></div></div>';
+                html += '<div class="result-body"><div class="result-medicine"><span class="med-icon">💊</span><div><strong>' + i.cantidad + ' unidades disponibles</strong></div></div></div></div>';
+            });
+        }
+        
+        document.getElementById('resultados-buscar').innerHTML = html;
+        document.getElementById('results-section').style.display = 'block';
+    }
+
+    // ===== ORGANIZATION ACTIONS =====
+    async function registrarDonacionOrg() {
+        const med = document.getElementById('org-don-medicina').value;
+        const cant = document.getElementById('org-don-cantidad').value;
+        const curp = document.getElementById('org-don-curp').value;
+        const fecha = document.getElementById('org-don-fecha').value;
+        
+        if (!med || !cant || !curp) {
+            alert('Completa todos los campos');
+            return;
+        }
+        
+        console.log('Enviando:', { idOrganizacion: currentOrgId, idMedicina: med, cantidad: cant, curpDonatario: curp, fechaCaducidad: fecha });
+        
+        try {
+            const r = await postAPI('/api/donaciones', {
+                idOrganizacion: currentOrgId,
+                idMedicina: parseInt(med),
+                cantidad: parseInt(cant),
+                curpDonatario: curp,
+                fechaCaducidad: fecha
+            });
+            
+            console.log('Respuesta:', r);
+            alert(r.message || 'Donación registrada');
+            loadOrgDashboard();
+            
+            // Limpiar campos
+            document.getElementById('org-don-cantidad').value = '';
+            document.getElementById('org-don-curp').value = '';
+        } catch (e) {
+            console.error('Error:', e);
+            alert('Error: ' + e.message);
+        }
+    }
+
+    async function registrarEntregaOrg() {
+        const med = document.getElementById('org-ent-medicina').value;
+        const cant = document.getElementById('org-ent-cantidad').value;
+        const curp = document.getElementById('org-ent-curp').value;
+        
+        if (!med || !cant || !curp) {
+            alert('Completa todos los campos');
+            return;
+        }
+        
+        try {
+            const r = await postAPI('/api/entregas', {
+                id_organizacion: currentOrgId,
+                id_medicina: parseInt(med),
+                cantidad: parseInt(cant),
+                curp_receptor: curp
+            });
+            
+            alert(r.message || 'Entrega registrada');
+            loadOrgDashboard();
+            
+            // Limpiar campos
+            document.getElementById('org-ent-cantidad').value = '';
+            document.getElementById('org-ent-curp').value = '';
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    async function registrarOrganizacion() {
+        const r = await postAPI('/api/organizaciones', {
+            nombre: document.getElementById('org-nombre').value,
+            usuario: document.getElementById('org-usuario').value,
+            clave: document.getElementById('org-clave').value,
+            latitud: parseFloat(document.getElementById('org-latitud').value),
+            longitud: parseFloat(document.getElementById('org-longitud').value)
+        });
+        
+        alert(r.message || 'Organización registrada');
+    }
+
+    // ===== MAPA =====
+    let leafletMap = null;
+    let markers = [];
+    
+    async function loadOrganizaciones() {
+        const orgs = await fetchAPI('/api/organizaciones');
+        
+        // Inicializar mapa Leaflet
+        if (!leafletMap) {
+            leafletMap = L.map('leaflet-map').setView([19.4326, -99.1332], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(leafletMap);
+        }
+        
+        // Limpiar marcadores anteriores
+        markers.forEach(m => leafletMap.removeLayer(m));
+        markers = [];
+        
+        // Agregar marcadores de organizaciones
+        orgs.forEach(o => {
+            const popupContent = `
+                <div style="min-width:150px">
+                    <b>${o.nombre}</b><br>
+                    <small>${o.usuario}</small><br><br>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${o.latitud},${o.longitud}" 
+                       target="_blank" 
+                       style="background:#10b981;color:white;padding:6px 12px;border-radius:6px;text-decoration:none;display:inline-block;font-size:12px">
+                        📍 Cómo llegar
+                    </a>
+                </div>
+            `;
+            const marker = L.marker([o.latitud, o.longitud])
+                .addTo(leafletMap)
+                .bindPopup(popupContent);
+            markers.push(marker);
+        });
+        
+        leafletMap.invalidateSize();
+        
+        // Cargar lista de organizaciones
+        let html = '';
+        orgs.forEach(o => {
+            html += `<div class="org-list-item" onclick="mostrarOrgEnMapa(${o.latitud}, ${o.longitud}, '${o.nombre}', '${o.usuario}')">
+                <span class="org-list-icon">🏥</span>
+                <div class="org-list-info"><h4>${o.nombre}</h4><p>${o.usuario}</p></div>
+                <div class="org-list-status available">Activo</div>
+            </div>`;
+        });
+        document.getElementById('mapa-organizaciones').innerHTML = html;
+    }
+    
+    function mostrarOrgEnMapa(lat, lng, nombre, usuario) {
+        leafletMap.setView([lat, lng], 15);
+        const popupContent = `
+            <div style="min-width:150px">
+                <b>${nombre}</b><br>
+                <small>${usuario}</small><br><br>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
+                   target="_blank" 
+                   style="background:#10b981;color:white;padding:6px 12px;border-radius:6px;text-decoration:none;display:inline-block;font-size:12px">
+                    📍 Cómo llegar
+                </a>
+            </div>
+        `;
+        L.marker([lat, lng]).addTo(leafletMap).bindPopup(popupContent).openPopup();
+    }
+    
+    function centrarEnOrg(lat, lng) {
+        if (leafletMap) {
+            leafletMap.setView([lat, lng], 15);
+        }
+    }
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('page-home').style.display = 'block';
+        loadHomeStats();
+    });
+    </script>
+</body>
+</html>

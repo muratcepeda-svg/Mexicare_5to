@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mexicare - Admin</title>
+    <style>
+        body { font-family: Arial; background: #1a1a2e; color: white; padding: 20px; }
+        h1 { color: #10B981; }
+        .card { background: #16213e; padding: 20px; margin: 10px 0; border-radius: 10px; }
+        .org-name { font-size: 18px; font-weight: bold; color: #10B981; }
+        .med { padding: 5px 10px; margin: 5px 0; background: #0f3460; border-radius: 5px; }
+        button { background: #10B981; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .badge { background: #e94560; padding: 5px 10px; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>🏥 Mexicare - Admin</h1>
+    <button onclick="cargar()">📦 Cargar Inventario</button>
+    <button onclick="cargarOrg()">🏢 Cargar Organizaciones</button>
+    <div id="result"></div>
+
+    <script>
+    const API = 'http://localhost:5000';
+    
+    async function cargar() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/inventario');
+            const items = await res.json();
+            
+            console.log('Items:', items);
+            
+            // Agrupar por organización
+            const porOrg = {};
+            items.forEach(item => {
+                const org = item.organizacion || 'Otro';
+                if (!porOrg[org]) porOrg[org] = [];
+                porOrg[org].push(item);
+            });
+            
+            let html = '<span class="badge">' + Object.keys(porOrg).length + ' organizaciones</span><br><br>';
+            
+            Object.keys(porOrg).forEach(org => {
+                const meds = porOrg[org];
+                const total = meds.reduce((s, i) => s + i.cantidad, 0);
+                
+                html += '<div class="card">';
+                html += '<div class="org-name">🏥 ' + org + ' (' + total + ' unidades)</div>';
+                
+                meds.forEach(m => {
+                    html += '<div class="med">💊 ' + m.nombre_comercial + ' - ' + m.cantidad + ' unidades (caduca: ' + m.fecha_caducidad + ')</div>';
+                });
+                
+                html += '</div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    
+    async function cargarOrg() {
+        document.getElementById('result').innerHTML = '<p>Cargando...</p>';
+        
+        try {
+            const res = await fetch(API + '/api/organizaciones');
+            const orgs = await res.json();
+            
+            let html = '<span class="badge">' + orgs.length + ' organizaciones</span><br><br>';
+            
+            orgs.forEach(o => {
+                html += '<div class="card">';
+                html += '<div class="org-name">🏥 ' + o.nombre + '</div>';
+                html += '<div>📍 ' + o.latitud + ', ' + o.longitud + '</div>';
+                html += '<div>👤 ' + o.usuario + '</div>';
+                html += '<div>✅ ' + (o.activo ? 'Activa' : 'Inactiva') + '</div>';
+                html += '</div>';
+            });
+            
+            document.getElementById('result').innerHTML = html;
+            
+        } catch (e) {
+            document.getElementById('result').innerHTML = '<p style="color:red">Error: ' + e.message + '</p>';
+        }
+    }
+    </script>
+</body>
+</html>
